@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome CDN for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <title>TrackMate</title>
+    <style>
+        body {
+            background-color: mediumseagreen;
+            color: black;
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .wallet {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25), 0px 0px 0px rgba(0, 0, 0, 0.25);
+            width: 400px;
+            border: 1px solid mediumseagreen;
+        }
+        .wallet input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .wallet button {
+            background-color: mediumseagreen;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .wallet button:hover {
+            background-color: darkseagreen;
+        }
+        .wallet .balance {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .wallet .currency {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .wallet .currency select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        /* Added styles for registration form */
+        .registration-form {
+            margin-top: 20px;
+            width: 100%;
+        }
+        .registration-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="wallet">
+    <h1>TrackMate</h1>
+    <input type="number" id="addMoney" placeholder="Add money">
+    <button onclick="addMoney()">Add</button>
+    <br><input type="number" id="spendMoney" placeholder="Spend money">
+    <button onclick="spendMoney()">Spend</button>
+    <br><div class="balance">Balance: Rs.<span id="balance">0</span></div>
+    <div class="currency">
+        <select id="currency">
+            <option value="inr">INR</option>
+            <option value="eur">EUR</option>
+            <option value="gbp">GBP</option>
+            <option value="usd">USD</option>
+        </select>
+        <button onclick="changeCurrency()">Change</button>
+    </div>
+    <!-- Added registration form -->
+    <form class="registration-form" id="registrationForm" action="/TrackMate" method="POST">
+        <input type="text" id="fullName" name="fullName" placeholder="Full Name">
+        <input type="email" id="email" name="email" placeholder="Email">
+        <button type="submit" onclick="recordMoney(event)">Register</button>
+    </form>
+</div>
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let balance = 0;
+    let currency = 'usd';
+
+    function addMoney() {
+        const money = parseFloat(document.getElementById('addMoney').value);
+        if (isNaN(money)) return;
+        balance += money;
+        document.getElementById('balance').textContent = balance.toFixed(2);
+        document.getElementById('addMoney').value = '';
+    }
+
+    function spendMoney() {
+        const money = parseFloat(document.getElementById('spendMoney').value);
+        if (isNaN(money)) return;
+        balance -= money;
+        document.getElementById('balance').textContent = balance.toFixed(2);
+        document.getElementById('spendMoney').value = '';
+    }
+
+    function changeCurrency() {
+        currency = document.getElementById('currency').value;
+    }
+
+    function recordMoney(event) {
+        event.preventDefault();
+        const fullName = document.getElementById('fullName').value;
+        const email = document.getElementById('email').value;
+
+        // Prepare data object to send to the server
+        const userData = {
+            name: fullName,
+            email: email,
+            balance: balance
+        };
+
+        // Send the data to the server using fetch API
+        fetch('/TrackMate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('User data saved successfully!');
+                    // Optionally, you can redirect the user to another page or show a success message here
+                } else {
+                    console.error('Failed to save user data:', response.statusText);
+                    // Handle the error accordingly
+                }
+            })
+            .catch(error => {
+                console.error('Error saving user data:', error.message);
+                // Handle the error accordingly
+            });
+
+        // Clear the form fields after submission
+        document.getElementById('fullName').value = '';
+        document.getElementById('email').value = '';
+    }
+</script>
+</body>
+</html>
